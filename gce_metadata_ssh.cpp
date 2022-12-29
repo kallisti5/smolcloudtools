@@ -26,6 +26,7 @@ get_metadata_keys(char* username)
 {
 		CURL* curl;
 		CURLcode res;
+		struct curl_slist *headers = NULL;
 
 		std::string result;
 		char url[128];
@@ -33,11 +34,15 @@ get_metadata_keys(char* username)
 
 		curl = curl_easy_init();
 		if (curl) {
+				headers = curl_slist_append(headers, "Metadata-Flavor: Google");
+
 				curl_easy_setopt(curl, CURLOPT_URL, url);
 				curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_write);
 				curl_easy_setopt(curl, CURLOPT_WRITEDATA, &result);
+				curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 				res = curl_easy_perform(curl);
 				curl_easy_cleanup(curl);
+				curl_slist_free_all(headers);
 
 				// XXX: There's probably a better way to do this...
 				std::istringstream stream(result);
